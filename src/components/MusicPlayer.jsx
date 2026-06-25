@@ -1,13 +1,23 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import './MusicPlayer.css';
 
-// 从 localStorage 读取歌单
+// 默认背景音乐（public/music/default.mp3）
+const DEFAULT_SONG = {
+  name: '🎵 默认背景音乐',
+  url: import.meta.env.BASE_URL + 'music/default.mp3',
+};
+
+// 从 localStorage 读取歌单，首次使用自动加载默认歌曲
 function loadPlaylist() {
   try {
     const saved = localStorage.getItem('typing-playlist');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const list = JSON.parse(saved);
+      if (list.length > 0) return list;
+    }
   } catch {}
-  return [];
+  // 首次使用：预置默认歌曲
+  return [DEFAULT_SONG];
 }
 
 function savePlaylist(list) {
@@ -35,6 +45,13 @@ function MusicPlayer({ onClose }) {
   useEffect(() => {
     savePlaylist(playlist);
   }, [playlist]);
+
+  // 打开播放器时自动播放第一首歌
+  useEffect(() => {
+    if (currentIdx === -1 && playlist.length > 0) {
+      playIndex(0);
+    }
+  }, []); // 只在挂载时触发
 
   // 切歌
   const playIndex = useCallback((idx) => {
