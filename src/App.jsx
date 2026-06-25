@@ -381,6 +381,14 @@ function App() {
         {renderText()}
       </div>
 
+      {/* ---- 用户输入实时回显 ---- */}
+      <div className="user-input-preview">
+        <span className="preview-label">你的输入：</span>
+        <span className="preview-text">
+          {userInput || <span className="preview-placeholder">等待输入...</span>}
+        </span>
+      </div>
+
       {/* ---- 输入区 ---- */}
       <div className="input-area" onClick={() => { inputRef.current?.focus(); setIsFocused(true); }}>
         <input
