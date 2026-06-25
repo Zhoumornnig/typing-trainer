@@ -195,11 +195,12 @@ body:has(.settings-overlay) {
 .preview-text {
   color: var(--text-bright);
   font-family: 'Microsoft YaHei', 'PingFang SC', var(--font-mono);
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.3rem;
+  font-weight: 400;
   word-break: break-all;
   flex: 1;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  line-height: 2.2;
   text-shadow: 0 0 8px rgba(108, 99, 255, 0.15);
 }
 
