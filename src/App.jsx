@@ -28,14 +28,6 @@ const DEFAULT_TEXTS = {
     "The juxtaposition of quantum computing and classical cryptography presents an unprecedented challenge for cybersecurity professionals. Post-quantum cryptographic algorithms must be developed expeditiously to safeguard sensitive information against the looming threat of quantum decryption capabilities that could potentially compromise existing encryption standards within the next decade.",
     "Microservices architecture facilitates the decomposition of monolithic applications into independently deployable services, each encapsulating a specific business capability. This paradigm shift necessitates robust inter-service communication protocols, comprehensive monitoring and observability frameworks, and sophisticated container orchestration mechanisms to maintain overall system reliability and performance.",
   ],
-  chinese: [
-    "人工智能正在改变我们的生活方式，从智能手机到自动驾驶汽车，技术的力量无处不在。作为计算机科学的学生，我们需要不断学习新知识，才能在快速变化的行业中保持竞争力。",
-    "广东工业大学位于美丽的广州，是一所以工为主、理工结合的省属重点大学。学校的计算机科学与技术专业培养了大量优秀的IT人才，他们在各行各业发光发热。",
-    "前端开发与后端开发是构建现代Web应用的两个重要方面。前端负责用户界面的呈现和交互体验，后端则处理数据存储、业务逻辑和服务器管理等核心功能。全栈开发者需要同时掌握这两个领域的技术。",
-    "公务员考试主要包括行政职业能力测验和申论两个科目。行测考察逻辑推理、数量关系、言语理解等能力，而申论则考察分析问题和文字表达的能力。提前做好规划，合理安排时间，是备考成功的关键。",
-    "数据结构是计算机科学的基石，它研究数据在计算机中的组织、存储和操作方式。常见的数据结构包括数组、链表、栈、队列、树、图等，每种结构都有其独特的优势和适用场景。",
-    "学习编程不仅仅是学习语法，更重要的是培养计算思维和解决问题的能力。通过不断的实践和项目经验的积累，我们能够逐步提升自己的技术水平，成为一名优秀的软件工程师。",
-  ],
 };
 
 // 从 localStorage 读取
@@ -79,7 +71,6 @@ function App() {
   const [totalKeystrokes, setTotalKeystrokes] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [difficulty, setDifficulty] = useState('easy');
-  const [language, setLanguage] = useState('en');
   const [currentKey, setCurrentKey] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
@@ -90,17 +81,9 @@ function App() {
 
   // ---- 生成文本 ----
   const generateText = useCallback(() => {
-    let pool;
-    if (language === 'zh') {
-      pool = textLibrary.chinese;
-    } else {
-      pool = textLibrary[difficulty] || textLibrary.easy;
-    }
-    if (!pool || pool.length === 0) {
-      pool = textLibrary.easy;
-    }
-    const idx = Math.floor(Math.random() * pool.length);
-    setText(pool[idx]);
+    const pool = textLibrary[difficulty] || textLibrary.easy;
+    const idx = Math.floor(Math.random() * (pool?.length || 1));
+    setText(pool?.[idx] || '');
     setUserInput('');
     setCurrentIndex(0);
     setStartTime(null);
@@ -110,7 +93,7 @@ function App() {
     setIsFinished(false);
     setCurrentKey('');
     setTimeout(() => inputRef.current?.focus(), 100);
-  }, [difficulty, language, textLibrary]);
+  }, [difficulty, textLibrary]);
 
   useEffect(() => {
     generateText();
@@ -214,7 +197,7 @@ function App() {
     }
 
     e.target.value = '';
-  }, [isFinished, showSettings, isComposing, startTime, text, currentIndex, userInput]);
+  }, [isFinished, showSettings, startTime, text, currentIndex, userInput]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -325,36 +308,16 @@ function App() {
       {/* ---- 控制面板 ---- */}
       <div className="controls">
         <div className="control-group">
-          <label className="control-label">语言</label>
+          <label className="control-label">难度</label>
           <div className="btn-group">
-            <button
-              className={`btn-ctrl ${language === 'en' ? 'active' : ''}`}
-              onClick={() => { setLanguage('en'); setDifficulty('easy'); }}
-            >
-              🇬🇧 English
-            </button>
-            <button
-              className={`btn-ctrl ${language === 'zh' ? 'active' : ''}`}
-              onClick={() => setLanguage('zh')}
-            >
-              🇨🇳 中文
-            </button>
+            <button className={`btn-ctrl ${difficulty === 'easy' ? 'active' : ''}`} onClick={() => setDifficulty('easy')}>🟢 简单</button>
+            <button className={`btn-ctrl ${difficulty === 'medium' ? 'active' : ''}`} onClick={() => setDifficulty('medium')}>🟡 中等</button>
+            <button className={`btn-ctrl ${difficulty === 'hard' ? 'active' : ''}`} onClick={() => setDifficulty('hard')}>🔴 困难</button>
+            {hasCustom && (
+              <button className={`btn-ctrl ${difficulty === 'custom' ? 'active' : ''}`} onClick={() => setDifficulty('custom')}>⭐ 我的</button>
+            )}
           </div>
         </div>
-
-        {language === 'en' && (
-          <div className="control-group">
-            <label className="control-label">难度</label>
-            <div className="btn-group">
-              <button className={`btn-ctrl ${difficulty === 'easy' ? 'active' : ''}`} onClick={() => setDifficulty('easy')}>🟢 简单</button>
-              <button className={`btn-ctrl ${difficulty === 'medium' ? 'active' : ''}`} onClick={() => setDifficulty('medium')}>🟡 中等</button>
-              <button className={`btn-ctrl ${difficulty === 'hard' ? 'active' : ''}`} onClick={() => setDifficulty('hard')}>🔴 困难</button>
-              {hasCustom && (
-                <button className={`btn-ctrl ${difficulty === 'custom' ? 'active' : ''}`} onClick={() => setDifficulty('custom')}>⭐ 我的</button>
-              )}
-            </div>
-          </div>
-        )}
 
         <button className="btn-refresh" onClick={() => {
           if (currentIndex > 0) {
