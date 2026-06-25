@@ -140,10 +140,31 @@ function App() {
   }, [currentIndex]);
 
   // ---- 键盘输入处理 ----
+  // 处理单个字符（被 keydown 和 input 事件共用）
+  const processChar = useCallback((char) => {
+    const expectedChar = text[currentIndex] || '';
+
+    setTotalKeystrokes((prev) => prev + 1);
+
+    if (char === expectedChar) {
+      setUserInput((prev) => prev + char);
+      const newIdx = currentIndex + 1;
+      setCurrentIndex(newIdx);
+      if (newIdx >= text.length) { setEndTime(Date.now()); setIsFinished(true); }
+    } else {
+      setErrors((prev) => prev + 1);
+      setUserInput((prev) => prev + char);
+      setCurrentIndex((prev) => prev + 1);
+      if (currentIndex + 1 >= text.length) { setEndTime(Date.now()); setIsFinished(true); }
+    }
+  }, [text, currentIndex]);
+
   const handleKeyDown = useCallback(
     (e) => {
       if (isFinished || showSettings) return;
-      if (isComposing) return; // 中文输入法组合中
+
+      // 中文输入法组合中：放行，让 input 事件处理
+      if (isComposing) return;
 
       if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'Alt' ||
           e.key === 'Meta' || e.key === 'Control' || e.key === 'Shift' ||
@@ -159,8 +180,6 @@ function App() {
       setCurrentKey(e.key);
       setTimeout(() => setCurrentKey(''), 120);
 
-      const expectedChar = text[currentIndex] || '';
-
       if (e.key === 'Backspace') {
         if (currentIndex > 0) {
           setCurrentIndex((prev) => prev - 1);
@@ -171,22 +190,31 @@ function App() {
 
       if (e.key.length > 1 && e.key !== ' ') return;
 
-      setTotalKeystrokes((prev) => prev + 1);
-
-      if (e.key === expectedChar) {
-        setUserInput((prev) => prev + e.key);
-        const newIdx = currentIndex + 1;
-        setCurrentIndex(newIdx);
-        if (newIdx >= text.length) { setEndTime(Date.now()); setIsFinished(true); }
-      } else {
-        setErrors((prev) => prev + 1);
-        setUserInput((prev) => prev + e.key);
-        setCurrentIndex((prev) => prev + 1);
-        if (currentIndex + 1 >= text.length) { setEndTime(Date.now()); setIsFinished(true); }
-      }
+      processChar(e.key);
     },
-    [isFinished, showSettings, isComposing, startTime, text, currentIndex]
+    [isFinished, showSettings, isComposing, startTime, currentIndex, processChar]
   );
+
+  // ---- 处理中文输入法提交 ----
+  const handleInput = useCallback((e) => {
+    const val = e.target.value;
+    if (!val || isFinished || showSettings) {
+      e.target.value = '';
+      return;
+    }
+
+    if (!startTime) setStartTime(Date.now());
+
+    // 逐字符处理（输入法可能一次提交多个字）
+    for (let i = 0; i < val.length; i++) {
+      const char = val[i];
+      setCurrentKey(char);
+      setTimeout(() => setCurrentKey(''), 120);
+      processChar(char);
+    }
+    // 清空 input 值，等待下次输入
+    e.target.value = '';
+  }, [isFinished, showSettings, startTime, processChar]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -355,8 +383,8 @@ function App() {
           onBlur={() => setIsFocused(false)}
           onCompositionStart={() => setIsComposing(true)}
           onCompositionEnd={() => setIsComposing(false)}
+          onInput={handleInput}
           autoFocus
-          readOnly
         />
         {!isFinished && !startTime && (
           <p className="hint">👆 点击任意位置，然后开始打字...</p>
