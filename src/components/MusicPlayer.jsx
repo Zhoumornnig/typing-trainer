@@ -177,6 +177,7 @@ function MusicPlayer({ visible, onClose }) {
         ref={audioRef}
         src={currentSong?.url || ''}
         autoPlay
+        loop
         onEnded={handleEnded}
         onTimeUpdate={handleTimeUpdate}
         onPlay={() => setIsPlaying(true)}
