@@ -163,6 +163,16 @@ function App() {
     (e) => {
       if (isFinished || showSettings) return;
 
+      // Backspace / Ctrl+Z 撤回，不受输入法影响，任何时候都能用
+      if (e.key === 'Backspace' || (e.key === 'z' && e.ctrlKey)) {
+        e.preventDefault();
+        if (currentIndex > 0) {
+          setCurrentIndex((prev) => prev - 1);
+          setUserInput((prev) => prev.slice(0, -1));
+        }
+        return;
+      }
+
       // 中文输入法组合中（包括拼音首字母）：放行，让 input 事件处理
       if (isComposing || e.isComposing) return;
 
@@ -179,14 +189,6 @@ function App() {
 
       setCurrentKey(e.key);
       setTimeout(() => setCurrentKey(''), 120);
-
-      if (e.key === 'Backspace') {
-        if (currentIndex > 0) {
-          setCurrentIndex((prev) => prev - 1);
-          setUserInput((prev) => prev.slice(0, -1));
-        }
-        return;
-      }
 
       if (e.key.length > 1 && e.key !== ' ') return;
 
@@ -376,6 +378,14 @@ function App() {
           </div>
         )}
 
+        <button className="btn-refresh" onClick={() => {
+          if (currentIndex > 0) {
+            setCurrentIndex((prev) => prev - 1);
+            setUserInput((prev) => prev.slice(0, -1));
+          }
+        }} disabled={currentIndex === 0}>
+          ↩️ 撤回
+        </button>
         <button className="btn-refresh" onClick={generateText}>🔄 换一题</button>
       </div>
 
