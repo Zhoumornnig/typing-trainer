@@ -1,0 +1,267 @@
+/* ============ 音乐播放器面板 ============ */
+.music-player {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  max-height: 460px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: slideUp 0.3s ease;
+}
+
+/* 头部 */
+.mp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mp-title {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.mp-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.mp-btn-icon {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(255,255,255,0.06);
+  color: #aaa;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.mp-btn-icon:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* 添加面板 */
+.mp-add-panel {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mp-input {
+  padding: 7px 10px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.78rem;
+  outline: none;
+}
+.mp-input:focus { border-color: var(--accent); }
+
+.mp-add-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.mp-btn-sm {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+.mp-btn-primary { background: var(--accent); color: #fff; }
+.mp-btn-primary:hover { background: var(--accent-light); }
+.mp-btn-outline { background: transparent; color: #ccc; border: 1px solid var(--border); }
+.mp-btn-outline:hover { border-color: var(--accent); color: #fff; }
+
+.mp-file-input { display: none; }
+
+/* 当前播放 */
+.mp-now-playing {
+  padding: 10px 14px 4px;
+}
+
+.mp-song-name {
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-time {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+  font-family: var(--font-mono);
+}
+
+/* 进度条 */
+.mp-progress-bar {
+  margin: 6px 14px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.mp-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.2s;
+}
+
+/* 控制按钮 */
+.mp-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 6px 0;
+}
+
+.mp-btn-ctrl {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #aaa;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.mp-btn-ctrl:hover { color: #fff; background: rgba(255,255,255,0.06); }
+
+.mp-btn-play {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.mp-btn-play:hover { background: var(--accent-light); transform: scale(1.05); }
+
+/* 音量 */
+.mp-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+}
+
+.mp-volume-slider {
+  flex: 1;
+  height: 4px;
+  appearance: none;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.mp-volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* 歌单 */
+.mp-playlist {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 150px;
+  border-top: 1px solid var(--border);
+}
+
+.mp-empty {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  padding: 20px;
+}
+
+.mp-song-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.mp-song-item:hover { background: rgba(255,255,255,0.04); }
+.mp-song-item.active { background: rgba(108,99,255,0.12); }
+.mp-song-item.active .mp-song-title { color: var(--accent-light); }
+
+.mp-song-idx {
+  width: 22px;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.mp-song-title {
+  flex: 1;
+  font-size: 0.8rem;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-btn-del {
+  padding: 2px 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.7rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 4px;
+}
+.mp-song-item:hover .mp-btn-del { opacity: 0.6; }
+.mp-btn-del:hover { opacity: 1 !important; background: rgba(248,113,113,0.2); }
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .music-player {
+    right: 8px;
+    bottom: 8px;
+    width: calc(100vw - 16px);
+    max-width: 300px;
+  }
+}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Keyboard from './components/Keyboard';
 import Stats from './components/Stats';
 import Settings from './components/Settings';
+import MusicPlayer from './components/MusicPlayer';
 import './App.css';
 
 // 练习文本库
@@ -76,6 +77,7 @@ function App() {
   const [isComposing, setIsComposing] = useState(false);
   const isComposingRef = useRef(false); // 同步 ref，避免 compositionend → input 的闭包延迟
   const [showSettings, setShowSettings] = useState(false);
+  const [showMusic, setShowMusic] = useState(false);
   const inputRef = useRef(null);
   const textDisplayRef = useRef(null);
 
@@ -296,6 +298,13 @@ function App() {
           <h1><span className="logo-icon">⌨️</span> 打字训练</h1>
           <button
             className="btn-settings-icon"
+            onClick={() => setShowMusic(!showMusic)}
+            title="音乐"
+          >
+            🎵
+          </button>
+          <button
+            className="btn-settings-icon"
             onClick={() => setShowSettings(true)}
             title="设置"
           >
@@ -406,6 +415,11 @@ function App() {
           <p className="bg-info">🖼️ 已设置自定义背景 · <button className="btn-link" onClick={handleBgRemove}>恢复默认</button></p>
         )}
       </footer>
+
+      {/* ---- 音乐播放器 ---- */}
+      {showMusic && (
+        <MusicPlayer onClose={() => setShowMusic(false)} />
+      )}
 
       {/* ---- 设置弹窗 ---- */}
       {showSettings && (
