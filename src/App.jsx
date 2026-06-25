@@ -169,9 +169,9 @@ function App() {
 
   // ---- 统一字符输入处理（英文打字 + 中文输入法提交） ----
   const handleInput = useCallback((e) => {
-    // 输入法组合中（拼音没打完）：跳过，等 compositionend 后再处理
-    // 用 ref 而非 state，因为 compositionend 后 input 事件同步触发，state 还未更新
-    if (isComposingRef.current) return;
+    // 输入法组合中（拼音没打完）：跳过
+    // ref 覆盖 compositionend→input 的间隙，nativeEvent.isComposing 覆盖 compositionstart 前的 input
+    if (isComposingRef.current || e.nativeEvent?.isComposing) return;
 
     const val = e.target.value;
     if (!val || isFinished || showSettings) {
