@@ -205,16 +205,36 @@ function App() {
 
     if (!startTime) setStartTime(Date.now());
 
-    // 逐字符处理（输入法可能一次提交多个字）
+    // 逐字符计算结果（当前闭包值足够，因为一次 input 事件内顺序计算）
+    let localIdx = currentIndex;
+    let localInput = userInput;
+    let errCount = 0;
+
     for (let i = 0; i < val.length; i++) {
       const char = val[i];
+      const expected = text[localIdx] || '';
+
       setCurrentKey(char);
       setTimeout(() => setCurrentKey(''), 120);
-      processChar(char);
+
+      localInput += char;
+      if (char !== expected) errCount++;
+      localIdx++;
+      if (localIdx >= text.length) break;
     }
-    // 清空 input 值，等待下次输入
+
+    // 批量更新
+    setTotalKeystrokes((prev) => prev + val.length);
+    if (errCount > 0) setErrors((prev) => prev + errCount);
+    setUserInput(localInput);
+    setCurrentIndex(localIdx);
+    if (localIdx >= text.length) {
+      setEndTime(Date.now());
+      setIsFinished(true);
+    }
+
     e.target.value = '';
-  }, [isFinished, showSettings, startTime, processChar]);
+  }, [isFinished, showSettings, startTime, text, currentIndex, userInput]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
