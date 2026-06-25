@@ -6,7 +6,7 @@
 
 .header h1 {
   font-size: 2.2rem;
-  color: #fff;
+  color: var(--text-bright);
   font-weight: 700;
   margin-bottom: 6px;
 }
@@ -71,13 +71,13 @@
 }
 
 .btn-ctrl:hover {
-  color: #fff;
+  color: var(--text-bright);
   background: rgba(255, 255, 255, 0.05);
 }
 
 .btn-ctrl.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-text);
   font-weight: 600;
 }
 
@@ -98,7 +98,7 @@
 }
 .btn-settings-icon:hover {
   border-color: var(--accent);
-  color: #fff;
+  color: var(--text-bright);
   background: var(--bg-card2);
 }
 
@@ -117,7 +117,7 @@
   text-decoration: underline;
   padding: 0;
 }
-.btn-link:hover { color: #fff; }
+.btn-link:hover { color: var(--text-bright); }
 
 /* 弹窗打开时防止背景滚动 */
 body:has(.settings-overlay) {
@@ -128,7 +128,7 @@ body:has(.settings-overlay) {
   padding: 10px 20px;
   border: 1px solid var(--border);
   background: var(--bg-card);
-  color: #fff;
+  color: var(--text-bright);
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -189,7 +189,7 @@ body:has(.settings-overlay) {
 }
 
 .preview-text {
-  color: #fff;
+  color: var(--text-bright);
   font-family: 'Microsoft YaHei', 'PingFang SC', var(--font-mono);
   font-size: 1.05rem;
   word-break: break-all;
@@ -197,7 +197,7 @@ body:has(.settings-overlay) {
 }
 
 .preview-placeholder {
-  color: #555;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -210,11 +210,11 @@ body:has(.settings-overlay) {
 }
 
 .char.correct {
-  color: #999;
+  color: var(--text-muted);
 }
 
 .char.incorrect {
-  color: #fff;
+  color: var(--text-bright);
   background: var(--incorrect-bg);
   text-decoration: underline;
   text-decoration-color: var(--incorrect);
@@ -234,7 +234,7 @@ body:has(.settings-overlay) {
 }
 
 .char.pending {
-  color: #cccd;
+  color: var(--text-dim);
 }
 
 /* ============ 输入区 ============ */
@@ -313,7 +313,7 @@ body:has(.settings-overlay) {
 }
 
 .finished-card h2 {
-  color: #fff;
+  color: var(--text-bright);
   font-size: 1.5rem;
   margin-bottom: 20px;
 }
@@ -337,7 +337,7 @@ body:has(.settings-overlay) {
 .result-value {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-bright);
   font-family: var(--font-mono);
 }
 
@@ -362,7 +362,7 @@ body:has(.settings-overlay) {
 .btn-restart {
   padding: 12px 36px;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-text);
   border: none;
   border-radius: 10px;
   font-size: 1rem;

@@ -33,7 +33,7 @@
 }
 
 .settings-header h2 {
-  color: #fff;
+  color: var(--text-bright);
   font-size: 1.2rem;
   margin: 0;
 }
@@ -42,8 +42,8 @@
   width: 32px;
   height: 32px;
   border: none;
-  background: rgba(255,255,255,0.08);
-  color: #aaa;
+  background: var(--hover-bg);
+  color: var(--text-dim);
   border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
@@ -52,7 +52,7 @@
   justify-content: center;
   transition: all 0.2s;
 }
-.btn-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.btn-close:hover { background: var(--hover-bg); color: var(--text-bright); }
 
 /* ---- 标签切换 ---- */
 .settings-tabs {
@@ -75,10 +75,10 @@
   font-size: 0.85rem;
   transition: all 0.2s;
 }
-.tab-btn:hover { color: #fff; }
+.tab-btn:hover { color: var(--text-bright); }
 .tab-btn.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--text-bright);
   font-weight: 600;
 }
 
@@ -120,7 +120,7 @@
   background: var(--bg-card2);
   border: 1px solid var(--border);
   border-radius: 8px;
-  color: #fff;
+  color: var(--text-bright);
   font-size: 0.85rem;
   outline: none;
   transition: border-color 0.2s;
@@ -132,7 +132,7 @@
   background: var(--bg-card2);
   border: 1px solid var(--border);
   border-radius: 8px;
-  color: #fff;
+  color: var(--text-bright);
   font-size: 0.85rem;
   outline: none;
   resize: vertical;
@@ -153,10 +153,10 @@
   white-space: nowrap;
   transition: all 0.2s;
 }
-.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary { background: var(--accent); color: var(--accent-text); }
 .btn-primary:hover { background: var(--accent-light); }
-.btn-outline { background: transparent; color: #ccc; border: 1px solid var(--border); }
-.btn-outline:hover { border-color: var(--accent); color: #fff; }
+.btn-outline { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent-text); }
 .btn-danger { background: rgba(248,113,113,0.15); color: var(--incorrect); }
 .btn-danger:hover { background: rgba(248,113,113,0.25); }
 
@@ -228,7 +228,7 @@
 
 .custom-text-preview {
   font-size: 0.82rem;
-  color: #ccc;
+  color: var(--text-dim);
   flex: 1;
   line-height: 1.4;
   word-break: break-all;
