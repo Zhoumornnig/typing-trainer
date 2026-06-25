@@ -1,0 +1,56 @@
+.stats-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 10px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px;
+  min-width: 80px;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: var(--font-mono);
+}
+
+.stat-value.good { color: var(--correct); }
+.stat-value.warn { color: var(--current); }
+.stat-value.bad { color: var(--incorrect); }
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: -2px;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+}
+
+@media (max-width: 600px) {
+  .stat-item {
+    padding: 0 12px;
+    min-width: 50px;
+  }
+  .stat-value {
+    font-size: 1.2rem;
+  }
+  .stat-label {
+    font-size: 0.62rem;
+  }
+}
