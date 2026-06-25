@@ -78,6 +78,7 @@ function App() {
   const isComposingRef = useRef(false); // 同步 ref，避免 compositionend → input 的闭包延迟
   const [showSettings, setShowSettings] = useState(false);
   const [showMusic, setShowMusic] = useState(false);
+  const [theme, setTheme] = useState(() => loadFromStorage('typing-theme', 'dark'));
   const inputRef = useRef(null);
   const textDisplayRef = useRef(null);
 
@@ -206,6 +207,18 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  // ---- 主题切换 ----
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('light');
+    } else {
+      document.body.classList.remove('light');
+    }
+    saveToStorage('typing-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+
   // ---- 背景图片处理（直接设到 body 上，覆盖整个页面） ----
   useEffect(() => {
     if (bgImage) {
@@ -296,6 +309,13 @@ function App() {
       <header className="header">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
           <h1><span className="logo-icon">⌨️</span> 打字训练</h1>
+          <button
+            className="btn-settings-icon"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? '切换日间模式' : '切换夜间模式'}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           <button
             className="btn-settings-icon"
             onClick={() => setShowMusic(!showMusic)}
