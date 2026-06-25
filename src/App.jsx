@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Keyboard from './components/Keyboard';
 import Stats from './components/Stats';
+import Settings from './components/Settings';
 import './App.css';
 
 // 练习文本库
-const TEXT_LIBRARY = {
+const DEFAULT_TEXTS = {
   easy: [
     "the quick brown fox jumps over the lazy dog",
     "a journey of a thousand miles begins with a single step",
@@ -37,7 +38,38 @@ const TEXT_LIBRARY = {
   ],
 };
 
+// 从 localStorage 读取
+function loadFromStorage(key, fallback) {
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return fallback;
+}
+
+function saveToStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {}
+}
+
 function App() {
+  // ---- 背景图片 ----
+  const [bgImage, setBgImage] = useState(() => loadFromStorage('typing-bg', ''));
+
+  // ---- 自定义题库 ----
+  const [customTexts, setCustomTexts] = useState(() => loadFromStorage('typing-custom-texts', []));
+
+  // 合并题库（useMemo 避免每次渲染重建导致 generateText 跟着变）
+  const textLibrary = useMemo(() => {
+    const lib = { ...DEFAULT_TEXTS };
+    if (customTexts.length > 0) {
+      lib.custom = customTexts;
+    }
+    return lib;
+  }, [customTexts]);
+
+  // ---- 打字状态 ----
   const [text, setText] = useState('');
   const [userInput, setUserInput] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -50,19 +82,24 @@ function App() {
   const [language, setLanguage] = useState('en');
   const [currentKey, setCurrentKey] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const inputRef = useRef(null);
   const textDisplayRef = useRef(null);
 
-  // 生成新文本
+  // ---- 生成文本 ----
   const generateText = useCallback(() => {
     let pool;
     if (language === 'zh') {
-      pool = TEXT_LIBRARY.chinese;
+      pool = textLibrary.chinese;
     } else {
-      pool = TEXT_LIBRARY[difficulty] || TEXT_LIBRARY.easy;
+      pool = textLibrary[difficulty] || textLibrary.easy;
     }
-    const randomIndex = Math.floor(Math.random() * pool.length);
-    setText(pool[randomIndex]);
+    if (!pool || pool.length === 0) {
+      pool = textLibrary.easy;
+    }
+    const idx = Math.floor(Math.random() * pool.length);
+    setText(pool[idx]);
     setUserInput('');
     setCurrentIndex(0);
     setStartTime(null);
@@ -72,42 +109,41 @@ function App() {
     setIsFinished(false);
     setCurrentKey('');
     setTimeout(() => inputRef.current?.focus(), 100);
-  }, [difficulty, language]);
+  }, [difficulty, language, textLibrary]);
 
   useEffect(() => {
     generateText();
   }, [generateText]);
 
-  // 自动聚焦
+  // ---- 自动聚焦 ----
   useEffect(() => {
     const handleClick = () => {
-      if (!isFinished) {
+      if (!isFinished && !showSettings) {
         inputRef.current?.focus();
         setIsFocused(true);
       }
     };
     window.addEventListener('click', handleClick);
     return () => window.removeEventListener('click', handleClick);
-  }, [isFinished]);
+  }, [isFinished, showSettings]);
 
-  // 自动滚动
+  // ---- 自动滚动 ----
   useEffect(() => {
     if (textDisplayRef.current && currentIndex > 0) {
       const chars = textDisplayRef.current.querySelectorAll('.char');
       if (chars[currentIndex]) {
         chars[currentIndex].scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center',
+          behavior: 'smooth', block: 'center', inline: 'center',
         });
       }
     }
   }, [currentIndex]);
 
-  // 核心：处理键盘输入
+  // ---- 键盘输入处理 ----
   const handleKeyDown = useCallback(
     (e) => {
-      if (isFinished) return;
+      if (isFinished || showSettings) return;
+      if (isComposing) return; // 中文输入法组合中
 
       if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'Alt' ||
           e.key === 'Meta' || e.key === 'Control' || e.key === 'Shift' ||
@@ -118,16 +154,13 @@ function App() {
 
       e.preventDefault();
 
-      if (!startTime) {
-        setStartTime(Date.now());
-      }
+      if (!startTime) setStartTime(Date.now());
 
       setCurrentKey(e.key);
       setTimeout(() => setCurrentKey(''), 120);
 
       const expectedChar = text[currentIndex] || '';
 
-      // Backspace 回退
       if (e.key === 'Backspace') {
         if (currentIndex > 0) {
           setCurrentIndex((prev) => prev - 1);
@@ -136,60 +169,93 @@ function App() {
         return;
       }
 
-      // 忽略其他功能键
-      if (e.key.length > 1 && e.key !== ' ') {
-        return;
-      }
+      if (e.key.length > 1 && e.key !== ' ') return;
 
       setTotalKeystrokes((prev) => prev + 1);
 
       if (e.key === expectedChar) {
-        // 正确
         setUserInput((prev) => prev + e.key);
-        const newIndex = currentIndex + 1;
-        setCurrentIndex(newIndex);
-        if (newIndex >= text.length) {
-          setEndTime(Date.now());
-          setIsFinished(true);
-        }
+        const newIdx = currentIndex + 1;
+        setCurrentIndex(newIdx);
+        if (newIdx >= text.length) { setEndTime(Date.now()); setIsFinished(true); }
       } else {
-        // 错误
         setErrors((prev) => prev + 1);
         setUserInput((prev) => prev + e.key);
         setCurrentIndex((prev) => prev + 1);
-        if (currentIndex + 1 >= text.length) {
-          setEndTime(Date.now());
-          setIsFinished(true);
-        }
+        if (currentIndex + 1 >= text.length) { setEndTime(Date.now()); setIsFinished(true); }
       }
     },
-    [isFinished, startTime, text, currentIndex]
+    [isFinished, showSettings, isComposing, startTime, text, currentIndex]
   );
 
-  // 全局键盘监听
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // 计算统计数据
+  // ---- 背景图片处理（直接设到 body 上，覆盖整个页面） ----
+  useEffect(() => {
+    if (bgImage) {
+      document.body.style.backgroundImage = `url(${bgImage})`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+      document.body.style.backgroundAttachment = 'fixed';
+    } else {
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundSize = '';
+      document.body.style.backgroundPosition = '';
+      document.body.style.backgroundAttachment = '';
+    }
+    return () => {
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundSize = '';
+      document.body.style.backgroundPosition = '';
+      document.body.style.backgroundAttachment = '';
+    };
+  }, [bgImage]);
+
+  const handleBgChange = useCallback((url) => {
+    setBgImage(url);
+    saveToStorage('typing-bg', url);
+  }, []);
+
+  const handleBgRemove = useCallback(() => {
+    setBgImage('');
+    saveToStorage('typing-bg', '');
+  }, []);
+
+  // ---- 自定义题库处理 ----
+  const handleAddCustomText = useCallback((newText) => {
+    setCustomTexts((prev) => {
+      const updated = [...prev, newText];
+      saveToStorage('typing-custom-texts', updated);
+      return updated;
+    });
+  }, []);
+
+  const handleDeleteCustomText = useCallback((index) => {
+    setCustomTexts((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      saveToStorage('typing-custom-texts', updated);
+      return updated;
+    });
+  }, []);
+
+  // ---- 统计数据 ----
   const getStats = () => {
     if (!startTime) return { wpm: 0, accuracy: 100, time: 0 };
-
     const end = endTime || Date.now();
     const timeInMinutes = (end - startTime) / 60000;
     const words = Math.max(totalKeystrokes, 1) / 5;
     const wpm = timeInMinutes > 0 ? Math.round(words / timeInMinutes) : 0;
-    const accuracy =
-      totalKeystrokes > 0
-        ? Math.round(((totalKeystrokes - errors) / totalKeystrokes) * 100)
-        : 100;
-    const timeInSeconds = Math.round((end - startTime) / 1000);
-
-    return { wpm, accuracy, time: timeInSeconds };
+    const accuracy = totalKeystrokes > 0
+      ? Math.round(((totalKeystrokes - errors) / totalKeystrokes) * 100) : 100;
+    return { wpm, accuracy, time: Math.round((end - startTime) / 1000) };
   };
 
-  // 渲染文本字符
+  const stats = getStats();
+
+  // ---- 渲染文本 ----
   const renderText = () => {
     return text.split('').map((char, index) => {
       let className = 'char';
@@ -209,32 +275,39 @@ function App() {
     });
   };
 
-  const stats = getStats();
+  const hasCustom = customTexts.length > 0;
 
   return (
     <div className="app">
-      {/* 顶部 */}
+      {/* ---- 头部 ---- */}
       <header className="header">
-        <h1>
-          <span className="logo-icon">⌨️</span> 打字训练
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+          <h1><span className="logo-icon">⌨️</span> 打字训练</h1>
+          <button
+            className="btn-settings-icon"
+            onClick={() => setShowSettings(true)}
+            title="设置"
+          >
+            ⚙️
+          </button>
+        </div>
         <p className="subtitle">提升打字速度与准确率 · 全栈实战项目</p>
       </header>
 
-      {/* 控制面板 */}
+      {/* ---- 控制面板 ---- */}
       <div className="controls">
         <div className="control-group">
           <label className="control-label">语言</label>
           <div className="btn-group">
             <button
               className={`btn-ctrl ${language === 'en' ? 'active' : ''}`}
-              onClick={() => { setLanguage('en'); setDifficulty('easy'); setTimeout(generateText, 0); }}
+              onClick={() => { setLanguage('en'); setDifficulty('easy'); }}
             >
               🇬🇧 English
             </button>
             <button
               className={`btn-ctrl ${language === 'zh' ? 'active' : ''}`}
-              onClick={() => { setLanguage('zh'); setTimeout(generateText, 0); }}
+              onClick={() => setLanguage('zh')}
             >
               🇨🇳 中文
             </button>
@@ -245,34 +318,20 @@ function App() {
           <div className="control-group">
             <label className="control-label">难度</label>
             <div className="btn-group">
-              <button
-                className={`btn-ctrl ${difficulty === 'easy' ? 'active' : ''}`}
-                onClick={() => { setDifficulty('easy'); setTimeout(generateText, 0); }}
-              >
-                🟢 简单
-              </button>
-              <button
-                className={`btn-ctrl ${difficulty === 'medium' ? 'active' : ''}`}
-                onClick={() => { setDifficulty('medium'); setTimeout(generateText, 0); }}
-              >
-                🟡 中等
-              </button>
-              <button
-                className={`btn-ctrl ${difficulty === 'hard' ? 'active' : ''}`}
-                onClick={() => { setDifficulty('hard'); setTimeout(generateText, 0); }}
-              >
-                🔴 困难
-              </button>
+              <button className={`btn-ctrl ${difficulty === 'easy' ? 'active' : ''}`} onClick={() => setDifficulty('easy')}>🟢 简单</button>
+              <button className={`btn-ctrl ${difficulty === 'medium' ? 'active' : ''}`} onClick={() => setDifficulty('medium')}>🟡 中等</button>
+              <button className={`btn-ctrl ${difficulty === 'hard' ? 'active' : ''}`} onClick={() => setDifficulty('hard')}>🔴 困难</button>
+              {hasCustom && (
+                <button className={`btn-ctrl ${difficulty === 'custom' ? 'active' : ''}`} onClick={() => setDifficulty('custom')}>⭐ 我的</button>
+              )}
             </div>
           </div>
         )}
 
-        <button className="btn-refresh" onClick={generateText}>
-          🔄 换一题
-        </button>
+        <button className="btn-refresh" onClick={generateText}>🔄 换一题</button>
       </div>
 
-      {/* 统计面板 */}
+      {/* ---- 统计 ---- */}
       <Stats
         wpm={stats.wpm}
         accuracy={stats.accuracy}
@@ -281,23 +340,21 @@ function App() {
         progress={text.length > 0 ? Math.round((currentIndex / text.length) * 100) : 0}
       />
 
-      {/* 文本显示区 */}
-      <div
-        className={`text-display ${isFocused ? 'focused' : ''} ${isFinished ? 'finished' : ''}`}
-        ref={textDisplayRef}
-      >
+      {/* ---- 文本显示 ---- */}
+      <div className={`text-display ${isFocused ? 'focused' : ''} ${isFinished ? 'finished' : ''}`} ref={textDisplayRef}>
         {renderText()}
       </div>
 
-      {/* 输入区 */}
+      {/* ---- 输入区 ---- */}
       <div className="input-area" onClick={() => { inputRef.current?.focus(); setIsFocused(true); }}>
         <input
           ref={inputRef}
           type="text"
           className="hidden-input"
-          onKeyDown={handleKeyDown}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={() => setIsComposing(false)}
           autoFocus
           readOnly
         />
@@ -308,55 +365,53 @@ function App() {
           <p className="hint typing">正在输入中... <span className="cursor-blink">|</span></p>
         )}
 
-        {/* 完成弹窗 */}
+        {/* ---- 完成弹窗 ---- */}
         {isFinished && (
           <div className="finished-overlay">
             <div className="finished-card">
               <div className="trophy">🏆</div>
               <h2>练习完成！</h2>
               <div className="result-grid">
-                <div className="result-item">
-                  <span className="result-value">{stats.wpm}</span>
-                  <span className="result-label">WPM 速度</span>
-                </div>
-                <div className="result-item">
-                  <span className="result-value highlight">{stats.accuracy}%</span>
-                  <span className="result-label">准确率</span>
-                </div>
-                <div className="result-item">
-                  <span className="result-value">{stats.time}s</span>
-                  <span className="result-label">用时</span>
-                </div>
-                <div className="result-item">
-                  <span className="result-value">{errors}</span>
-                  <span className="result-label">错误数</span>
-                </div>
+                <div className="result-item"><span className="result-value">{stats.wpm}</span><span className="result-label">WPM 速度</span></div>
+                <div className="result-item"><span className="result-value highlight">{stats.accuracy}%</span><span className="result-label">准确率</span></div>
+                <div className="result-item"><span className="result-value">{stats.time}s</span><span className="result-label">用时</span></div>
+                <div className="result-item"><span className="result-value">{errors}</span><span className="result-label">错误数</span></div>
               </div>
-              {/* 评级 */}
               <div className="grade">
                 {stats.accuracy >= 95 && stats.wpm >= 60 ? '⭐ 优秀！你已经是打字高手了' :
                  stats.accuracy >= 90 && stats.wpm >= 40 ? '👍 良好！继续保持练习' :
                  stats.accuracy >= 80 ? '📚 不错！准确率还可以再提升' :
                  '💪 继续加油！多练习就会进步的'}
               </div>
-              <button className="btn-restart" onClick={generateText}>
-                🔄 再来一题
-              </button>
+              <button className="btn-restart" onClick={generateText}>🔄 再来一题</button>
             </div>
           </div>
         )}
       </div>
 
-      {/* 键盘可视化 */}
+      {/* ---- 键盘 ---- */}
       <Keyboard currentKey={currentKey} expectedChar={text[currentIndex] || ''} />
 
-      {/* 页脚提示 */}
+      {/* ---- 页脚 ---- */}
       <footer className="footer">
-        <p>
-          💡 <strong>提示：</strong>点击页面任意位置激活输入，然后直接开始打字。
-          <kbd>Backspace</kbd> 可以回退修改。
-        </p>
+        <p>💡 <strong>提示：</strong>点击页面任意位置激活输入，<kbd>Backspace</kbd> 回退修改。</p>
+        {bgImage && (
+          <p className="bg-info">🖼️ 已设置自定义背景 · <button className="btn-link" onClick={handleBgRemove}>恢复默认</button></p>
+        )}
       </footer>
+
+      {/* ---- 设置弹窗 ---- */}
+      {showSettings && (
+        <Settings
+          bgImage={bgImage}
+          onBgChange={handleBgChange}
+          onBgRemove={handleBgRemove}
+          customTexts={customTexts}
+          onAddCustomText={handleAddCustomText}
+          onDeleteCustomText={handleDeleteCustomText}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
     </div>
   );
 }

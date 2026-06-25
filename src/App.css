@@ -81,6 +81,49 @@
   font-weight: 600;
 }
 
+/* 设置按钮 */
+.btn-settings-icon {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-dim);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.btn-settings-icon:hover {
+  border-color: var(--accent);
+  color: #fff;
+  background: var(--bg-card2);
+}
+
+/* 背景信息 */
+.bg-info {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent-light);
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  padding: 0;
+}
+.btn-link:hover { color: #fff; }
+
+/* 弹窗打开时防止背景滚动 */
+body:has(.settings-overlay) {
+  overflow: hidden;
+}
+
 .btn-refresh {
   padding: 10px 20px;
   border: 1px solid var(--border);
