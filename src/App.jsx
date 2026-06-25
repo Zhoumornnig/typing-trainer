@@ -155,13 +155,19 @@ function App() {
         return;
       }
 
-      // Tab / Escape / Enter 等特殊键拦截（避免输入框意外换行/提交）
+      // 如果是输入法组合键（拼音字母），阻止写入 input，避免提前触发 input 事件
+      if (e.isComposing) {
+        e.preventDefault();
+        return;
+      }
+
+      // Tab / Escape / Enter 等特殊键拦截
       if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'Enter') {
         e.preventDefault();
         return;
       }
 
-      // 其余所有键（英文、拼音、符号…）不 preventDefault，
+      // 其余英文/符号键：不 preventDefault，
       // 让浏览器把字符写入 <input>，由 handleInput 统一处理
     },
     [isFinished, showSettings, currentIndex]
@@ -170,8 +176,7 @@ function App() {
   // ---- 统一字符输入处理（英文打字 + 中文输入法提交） ----
   const handleInput = useCallback((e) => {
     // 输入法组合中（拼音没打完）：跳过
-    // ref 覆盖 compositionend→input 的间隙，nativeEvent.isComposing 覆盖 compositionstart 前的 input
-    if (isComposingRef.current || e.nativeEvent?.isComposing) return;
+    if (isComposingRef.current) return;
 
     const val = e.target.value;
     if (!val || isFinished || showSettings) {
