@@ -19,15 +19,41 @@ const DEFAULT_TEXTS = {
     "success is not final failure is not fatal it is the courage to continue that counts",
     "in the middle of difficulty lies opportunity for those who seek it",
   ],
-  medium: [
-    "The exploration of artificial intelligence has revolutionized how we interact with technology in our daily lives. From voice assistants to autonomous vehicles, AI continues to push the boundaries of what machines can achieve in the modern world.",
-    "Full-stack development requires proficiency in both frontend and backend technologies. A skilled developer must understand databases, server architecture, APIs, and user interface design to build complete and robust applications.",
-    "Data structures and algorithms form the foundation of computer science. Understanding time complexity, space complexity, and algorithmic thinking is essential for solving complex computational problems efficiently.",
-    "Version control systems like Git enable developers to track changes, collaborate with team members, and maintain a comprehensive history of their codebase throughout the software development lifecycle.",
+  highschool: [
+    "Education is the most powerful weapon which you can use to change the world. Every student has the potential to achieve greatness through hard work and determination.",
+    "The environment plays a crucial role in our daily lives. We should take responsibility for protecting nature and reducing pollution for future generations.",
+    "Technology has changed the way we communicate with each other. Social media allows people to stay connected regardless of distance and time zones.",
+    "Reading books can broaden our horizons and enrich our knowledge. A good book is like a wise friend who guides us through difficult times.",
+    "Health is more important than wealth. Regular exercise and a balanced diet are essential for maintaining both physical and mental well-being.",
+    "Traveling to different places helps us understand diverse cultures and traditions. It is an excellent way to learn about the world beyond our textbooks.",
+    "Teamwork is essential in almost every aspect of life. When people work together towards a common goal, they can accomplish far more than any individual could alone.",
+    "Time management is a valuable skill for students. Learning to prioritize tasks and avoid procrastination can greatly improve academic performance.",
+    "Volunteering is a meaningful way to contribute to society. Helping others not only benefits the community but also brings personal satisfaction and growth.",
+    "Critical thinking enables us to analyze information objectively and make informed decisions. It is one of the most important skills in the modern world.",
   ],
-  hard: [
-    "The juxtaposition of quantum computing and classical cryptography presents an unprecedented challenge for cybersecurity professionals. Post-quantum cryptographic algorithms must be developed expeditiously to safeguard sensitive information against the looming threat of quantum decryption capabilities that could potentially compromise existing encryption standards within the next decade.",
-    "Microservices architecture facilitates the decomposition of monolithic applications into independently deployable services, each encapsulating a specific business capability. This paradigm shift necessitates robust inter-service communication protocols, comprehensive monitoring and observability frameworks, and sophisticated container orchestration mechanisms to maintain overall system reliability and performance.",
+  cet4: [
+    "The government has implemented a series of policies to promote sustainable economic development and improve the overall quality of life for all citizens across the country.",
+    "Modern universities are committed to providing students with comprehensive education that combines theoretical knowledge with practical skills for their future careers.",
+    "The rapid advancement of artificial intelligence has significantly transformed various industries and created both opportunities and challenges for the global workforce.",
+    "Effective communication skills are increasingly valued in the workplace. The ability to express ideas clearly and collaborate with colleagues determines professional success.",
+    "Global climate change poses a serious threat to ecosystems worldwide. International cooperation is urgently needed to address environmental challenges and reduce carbon emissions.",
+    "The popularity of online learning platforms has made education more accessible than ever before. Students can now acquire new skills from anywhere at their own pace.",
+    "Cultural diversity enriches our society in countless ways. Exposure to different perspectives and traditions fosters creativity, innovation, and mutual understanding.",
+    "Financial literacy is an essential life skill that helps individuals make informed decisions about budgeting, saving, and investing for their long-term financial security.",
+    "The healthcare system continues to evolve with technological innovations. Telemedicine and digital health records have improved the efficiency and accessibility of medical services.",
+    "Entrepreneurship requires a combination of creativity, resilience, and strategic thinking. Successful entrepreneurs are willing to take calculated risks and learn from failure.",
+  ],
+  cet6: [
+    "The unprecedented complexity of contemporary geopolitical dynamics necessitates a multifaceted approach to international diplomacy and conflict resolution strategies.",
+    "Neuroscientific research has revealed the remarkable plasticity of the human brain, demonstrating its extraordinary capacity to adapt and reorganize throughout an individual's lifespan.",
+    "The proliferation of misinformation on digital platforms underscores the critical importance of media literacy and the need for rigorous fact-checking mechanisms in democratic societies.",
+    "Sustainable urbanization requires the integration of environmental considerations into infrastructure planning, balancing economic growth with ecological preservation and social equity.",
+    "The philosophical discourse on consciousness and artificial intelligence raises profound questions about the nature of self-awareness and the ethical implications of technological advancement.",
+    "Interdisciplinary collaboration between scientists, policymakers, and industry leaders is indispensable for addressing the multifaceted challenges posed by climate change and resource depletion.",
+    "The juxtaposition of traditional pedagogical methods with innovative educational technologies presents both opportunities and dilemmas for contemporary curriculum development.",
+    "Corporate social responsibility has evolved from a peripheral consideration to a fundamental component of organizational strategy, reflecting growing stakeholder expectations regarding ethical business practices.",
+    "The intricate relationship between socioeconomic inequality and public health outcomes demonstrates the necessity of holistic policy interventions that address systemic determinants of well-being.",
+    "Technological disruption simultaneously creates and destroys economic value, necessitating adaptive regulatory frameworks that foster innovation while protecting vulnerable populations from adverse consequences.",
   ],
 };
 
@@ -337,11 +363,12 @@ function App() {
       {/* ---- 控制面板 ---- */}
       <div className="controls">
         <div className="control-group">
-          <label className="control-label">难度</label>
+          <label className="control-label">题库</label>
           <div className="btn-group">
-            <button className={`btn-ctrl ${difficulty === 'easy' ? 'active' : ''}`} onClick={() => setDifficulty('easy')}>🟢 简单</button>
-            <button className={`btn-ctrl ${difficulty === 'medium' ? 'active' : ''}`} onClick={() => setDifficulty('medium')}>🟡 中等</button>
-            <button className={`btn-ctrl ${difficulty === 'hard' ? 'active' : ''}`} onClick={() => setDifficulty('hard')}>🔴 困难</button>
+            <button className={`btn-ctrl ${difficulty === 'easy' ? 'active' : ''}`} onClick={() => setDifficulty('easy')}>🟢 基础</button>
+            <button className={`btn-ctrl ${difficulty === 'highschool' ? 'active' : ''}`} onClick={() => setDifficulty('highschool')}>🏫 高中</button>
+            <button className={`btn-ctrl ${difficulty === 'cet4' ? 'active' : ''}`} onClick={() => setDifficulty('cet4')}>🎓 四级</button>
+            <button className={`btn-ctrl ${difficulty === 'cet6' ? 'active' : ''}`} onClick={() => setDifficulty('cet6')}>📚 六级</button>
             {hasCustom && (
               <button className={`btn-ctrl ${difficulty === 'custom' ? 'active' : ''}`} onClick={() => setDifficulty('custom')}>⭐ 我的</button>
             )}
