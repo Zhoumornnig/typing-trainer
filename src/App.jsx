@@ -83,6 +83,7 @@ function App() {
   const [currentKey, setCurrentKey] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
+  const isComposingRef = useRef(false); // 同步 ref，避免 compositionend → input 的闭包延迟
   const [showSettings, setShowSettings] = useState(false);
   const inputRef = useRef(null);
   const textDisplayRef = useRef(null);
@@ -139,31 +140,12 @@ function App() {
     }
   }, [currentIndex]);
 
-  // ---- 键盘输入处理 ----
-  // 处理单个字符（被 keydown 和 input 事件共用）
-  const processChar = useCallback((char) => {
-    const expectedChar = text[currentIndex] || '';
-
-    setTotalKeystrokes((prev) => prev + 1);
-
-    if (char === expectedChar) {
-      setUserInput((prev) => prev + char);
-      const newIdx = currentIndex + 1;
-      setCurrentIndex(newIdx);
-      if (newIdx >= text.length) { setEndTime(Date.now()); setIsFinished(true); }
-    } else {
-      setErrors((prev) => prev + 1);
-      setUserInput((prev) => prev + char);
-      setCurrentIndex((prev) => prev + 1);
-      if (currentIndex + 1 >= text.length) { setEndTime(Date.now()); setIsFinished(true); }
-    }
-  }, [text, currentIndex]);
-
+  // ---- 键盘事件：只处理退格/撤回，其他键放行给 input 事件 ----
   const handleKeyDown = useCallback(
     (e) => {
       if (isFinished || showSettings) return;
 
-      // Backspace / Ctrl+Z 撤回，不受输入法影响，任何时候都能用
+      // 退格 / Ctrl+Z 撤回
       if (e.key === 'Backspace' || (e.key === 'z' && e.ctrlKey)) {
         e.preventDefault();
         if (currentIndex > 0) {
@@ -173,32 +155,24 @@ function App() {
         return;
       }
 
-      // 中文输入法组合中（包括拼音首字母）：放行，让 input 事件处理
-      if (isComposing || e.isComposing) return;
-
-      if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'Alt' ||
-          e.key === 'Meta' || e.key === 'Control' || e.key === 'Shift' ||
-          e.key === 'CapsLock' || e.key === 'Fn' || e.key === 'ContextMenu' ||
-          e.key.startsWith('Arrow') || e.key === 'Enter') {
+      // Tab / Escape / Enter 等特殊键拦截（避免输入框意外换行/提交）
+      if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'Enter') {
+        e.preventDefault();
         return;
       }
 
-      e.preventDefault();
-
-      if (!startTime) setStartTime(Date.now());
-
-      setCurrentKey(e.key);
-      setTimeout(() => setCurrentKey(''), 120);
-
-      if (e.key.length > 1 && e.key !== ' ') return;
-
-      processChar(e.key);
+      // 其余所有键（英文、拼音、符号…）不 preventDefault，
+      // 让浏览器把字符写入 <input>，由 handleInput 统一处理
     },
-    [isFinished, showSettings, isComposing, startTime, currentIndex, processChar]
+    [isFinished, showSettings, currentIndex]
   );
 
-  // ---- 处理中文输入法提交 ----
+  // ---- 统一字符输入处理（英文打字 + 中文输入法提交） ----
   const handleInput = useCallback((e) => {
+    // 输入法组合中（拼音没打完）：跳过，等 compositionend 后再处理
+    // 用 ref 而非 state，因为 compositionend 后 input 事件同步触发，state 还未更新
+    if (isComposingRef.current) return;
+
     const val = e.target.value;
     if (!val || isFinished || showSettings) {
       e.target.value = '';
@@ -207,7 +181,7 @@ function App() {
 
     if (!startTime) setStartTime(Date.now());
 
-    // 逐字符计算结果（当前闭包值足够，因为一次 input 事件内顺序计算）
+    // 逐字符匹配
     let localIdx = currentIndex;
     let localInput = userInput;
     let errCount = 0;
@@ -225,7 +199,6 @@ function App() {
       if (localIdx >= text.length) break;
     }
 
-    // 批量更新
     setTotalKeystrokes((prev) => prev + val.length);
     if (errCount > 0) setErrors((prev) => prev + errCount);
     setUserInput(localInput);
@@ -236,7 +209,7 @@ function App() {
     }
 
     e.target.value = '';
-  }, [isFinished, showSettings, startTime, text, currentIndex, userInput]);
+  }, [isFinished, showSettings, isComposing, startTime, text, currentIndex, userInput]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -411,8 +384,8 @@ function App() {
           className="hidden-input"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          onCompositionStart={() => setIsComposing(true)}
-          onCompositionEnd={() => setIsComposing(false)}
+          onCompositionStart={() => { isComposingRef.current = true; setIsComposing(true); }}
+          onCompositionEnd={() => { isComposingRef.current = false; setIsComposing(false); }}
           onInput={handleInput}
           autoFocus
         />
