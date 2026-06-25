@@ -150,7 +150,7 @@ body:has(.settings-overlay) {
   min-height: 140px;
   max-height: 260px;
   overflow-y: auto;
-  font-family: var(--font-mono);
+  font-family: 'Microsoft YaHei', 'PingFang SC', var(--font-mono);
   font-size: 1.3rem;
   line-height: 2.2;
   letter-spacing: 1px;
@@ -190,7 +190,7 @@ body:has(.settings-overlay) {
 
 .preview-text {
   color: #fff;
-  font-family: var(--font-mono);
+  font-family: 'Microsoft YaHei', 'PingFang SC', var(--font-mono);
   font-size: 1.05rem;
   word-break: break-all;
   flex: 1;
