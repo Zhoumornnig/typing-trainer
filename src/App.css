@@ -171,34 +171,43 @@ body:has(.settings-overlay) {
 /* ---- 用户输入实时回显 ---- */
 .user-input-preview {
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px 18px;
+  padding: 14px 18px;
   margin-bottom: 12px;
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .preview-label {
   color: var(--text-dim);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   white-space: nowrap;
-  line-height: 1.6;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
 }
 
 .preview-text {
   color: var(--text-bright);
   font-family: 'Microsoft YaHei', 'PingFang SC', var(--font-mono);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
+  font-weight: 500;
   word-break: break-all;
   flex: 1;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(108, 99, 255, 0.15);
 }
 
 .preview-placeholder {
   color: var(--text-muted);
   font-style: italic;
+  letter-spacing: 1px;
+  animation: hintPulse 2s ease-in-out infinite;
 }
 
 /* 字符样式 */
@@ -255,16 +264,31 @@ body:has(.settings-overlay) {
 
 .hint {
   color: var(--text-dim);
-  font-size: 0.9rem;
+  font-size: 1rem;
   user-select: none;
+  padding: 14px 28px;
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  animation: hintPulse 2s ease-in-out infinite;
 }
 
 .hint.typing {
   color: var(--accent-light);
+  border-color: var(--accent);
+  background: var(--bg-card2);
+  animation: none;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.6; border-color: var(--border); }
+  50% { opacity: 1; border-color: var(--accent); }
 }
 
 .cursor-blink {
   animation: blink 0.8s step-end infinite;
+  color: var(--accent-light);
+  font-weight: bold;
 }
 
 @keyframes blink {
