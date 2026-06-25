@@ -416,10 +416,8 @@ function App() {
         )}
       </footer>
 
-      {/* ---- 音乐播放器 ---- */}
-      {showMusic && (
-        <MusicPlayer onClose={() => setShowMusic(false)} />
-      )}
+      {/* ---- 音乐播放器（始终挂载，进页面就播） ---- */}
+      <MusicPlayer visible={showMusic} onClose={() => setShowMusic(false)} />
 
       {/* ---- 设置弹窗 ---- */}
       {showSettings && (

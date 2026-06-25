@@ -26,7 +26,7 @@ function savePlaylist(list) {
   } catch {}
 }
 
-function MusicPlayer({ onClose }) {
+function MusicPlayer({ visible, onClose }) {
   const [playlist, setPlaylist] = useState(loadPlaylist);
   const [currentIdx, setCurrentIdx] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -171,25 +171,34 @@ function MusicPlayer({ onClose }) {
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="music-player">
-      {/* 隐藏的 audio 元素 */}
+    <>
+      {/* 隐藏的 audio 元素 — 始终渲染，保持播放 */}
       <audio
         ref={audioRef}
         src={currentSong?.url || ''}
+        autoPlay
         onEnded={handleEnded}
         onTimeUpdate={handleTimeUpdate}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        onCanPlay={() => {
+          // 音频就绪后尝试播放
+          audioRef.current?.play().catch(() => {});
+        }}
       />
 
-      {/* 顶部栏 */}
-      <div className="mp-header">
-        <span className="mp-title">🎵 音乐</span>
-        <div className="mp-header-actions">
-          <button className="mp-btn-icon" onClick={() => setShowAdd(!showAdd)} title="添加歌曲">➕</button>
-          <button className="mp-btn-icon" onClick={onClose} title="关闭">✕</button>
+      {/* UI 面板 — 只在 visible 时显示 */}
+      {visible && (
+      <div className="music-player">
+
+        {/* 顶部栏 */}
+        <div className="mp-header">
+          <span className="mp-title">🎵 音乐</span>
+          <div className="mp-header-actions">
+            <button className="mp-btn-icon" onClick={() => setShowAdd(!showAdd)} title="添加歌曲">➕</button>
+            <button className="mp-btn-icon" onClick={onClose} title="关闭">✕</button>
+          </div>
         </div>
-      </div>
 
       {/* 添加歌曲面板 */}
       {showAdd && (
@@ -281,6 +290,8 @@ function MusicPlayer({ onClose }) {
         )}
       </div>
     </div>
+    )}
+    </>
   );
 }
 
