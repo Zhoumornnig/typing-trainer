@@ -163,8 +163,8 @@ function App() {
     (e) => {
       if (isFinished || showSettings) return;
 
-      // 中文输入法组合中：放行，让 input 事件处理
-      if (isComposing) return;
+      // 中文输入法组合中（包括拼音首字母）：放行，让 input 事件处理
+      if (isComposing || e.isComposing) return;
 
       if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'Alt' ||
           e.key === 'Meta' || e.key === 'Control' || e.key === 'Shift' ||
